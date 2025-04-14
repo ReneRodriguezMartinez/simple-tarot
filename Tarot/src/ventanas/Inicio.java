@@ -4,6 +4,9 @@
  */
 package ventanas;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.ImageIcon;
@@ -118,17 +121,32 @@ public class Inicio extends javax.swing.JFrame {
         }
     }
     
-    private void mostrarCarta(){
-      String ruta;   
-       if(reverso){
+   private void mostrarCarta() {
+    String ruta;   
+    if (reverso) {
         int i = random.nextInt(cartas.size());
         ruta = cartas.get(i);
-        jLabel1.setIcon(new ImageIcon(getClass().getResource(ruta)));
-        reverso=false;
-       }else{
+
+        ImageIcon icon = new ImageIcon(getClass().getResource(ruta));
+        
+        // 50% de probabilidad de mostrarla al revés
+        if (random.nextBoolean()) {
+            Image img = icon.getImage();
+            BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = bi.createGraphics();
+            g2d.rotate(Math.toRadians(180), icon.getIconWidth() / 2.0, icon.getIconHeight() / 2.0);
+            g2d.drawImage(img, 0, 0, null);
+            g2d.dispose();
+            icon = new ImageIcon(bi);
+        }
+
+        jLabel1.setIcon(icon);
+        reverso = false;
+    } else {
         jLabel1.setIcon(new ImageIcon(getClass().getResource("/img/tarot_cover_red.png")));
-        reverso=true;
-       }
-    }       
+        reverso = true;
+    }
+}
+
  
 }
