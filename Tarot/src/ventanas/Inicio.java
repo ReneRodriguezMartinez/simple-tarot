@@ -7,9 +7,11 @@ package ventanas;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.ImageIcon;
+import javazoom.jl.player.Player;
 
 /**
  *
@@ -19,14 +21,16 @@ public class Inicio extends javax.swing.JFrame {
 
    
     
-    //lista con las rutas de todas las cartas
-    private ArrayList<String> cartas ;
     //cantidad de cartas en la carpeta
     private final int CANTIDAD_DE_CARTAS=22; 
+    //ruta donde esta el sonido a reproducir
+    private final String RUTA_SONIDO="src/sonidos/voltear.mp3"; 
     //objeto random con el que vamos a randomizar sacar cartas aleatorias
     private Random random;
     //para saber si se ha revelado la carta antes para dar la vuelta a la carta
     private Boolean reverso;
+    //lista con las rutas de todas las cartas
+    private ArrayList<String> cartas ;
     
     public Inicio() {
         initComponents();
@@ -116,37 +120,46 @@ public class Inicio extends javax.swing.JFrame {
     
     //metodo que añade las rutas de las imagenes al arraylist
     private void cargarCartas() {
-         for (int i = 1; i <= CANTIDAD_DE_CARTAS; i++) {
+        for (int i = 1; i <= CANTIDAD_DE_CARTAS; i++) {
             cartas.add("/img-cartas/" + i + ".png");
         }
     }
     
    private void mostrarCarta() {
-    String ruta;   
-    if (reverso) {
-        int i = random.nextInt(cartas.size());
-        ruta = cartas.get(i);
+        String ruta;   
+        if (reverso) {
+            int i = random.nextInt(cartas.size());
+            ruta = cartas.get(i);
 
-        ImageIcon icon = new ImageIcon(getClass().getResource(ruta));
-        
-        // 50% de probabilidad de mostrarla al revés
-        if (random.nextBoolean()) {
-            Image img = icon.getImage();
-            BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = bi.createGraphics();
-            g2d.rotate(Math.toRadians(180), icon.getIconWidth() / 2.0, icon.getIconHeight() / 2.0);
-            g2d.drawImage(img, 0, 0, null);
-            g2d.dispose();
-            icon = new ImageIcon(bi);
+            ImageIcon icon = new ImageIcon(getClass().getResource(ruta));
+
+            // 50% de probabilidad de mostrarla al revés
+            if (random.nextBoolean()) {
+                Image img = icon.getImage();
+                BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = bi.createGraphics();
+                g2d.rotate(Math.toRadians(180), icon.getIconWidth() / 2.0, icon.getIconHeight() / 2.0);
+                g2d.drawImage(img, 0, 0, null);
+                g2d.dispose();
+                icon = new ImageIcon(bi);
+            }
+
+            jLabel1.setIcon(icon);
+            reverso = false;
+        } else {
+            jLabel1.setIcon(new ImageIcon(getClass().getResource("/img/tarot_cover_red.png")));
+            reverso = true;
         }
-
-        jLabel1.setIcon(icon);
-        reverso = false;
-    } else {
-        jLabel1.setIcon(new ImageIcon(getClass().getResource("/img/tarot_cover_red.png")));
-        reverso = true;
+        reproducir_sonido();
     }
-}
-
- 
+    
+    private void reproducir_sonido() {
+           try {
+            FileInputStream fis = new FileInputStream(RUTA_SONIDO);
+            Player player = new Player(fis);
+            player.play();
+        } catch (Exception e) {
+            System.out.println("Error al reproducir el Sonido de voltear la carta: " + e.getMessage());
+        }
+    }
 }
