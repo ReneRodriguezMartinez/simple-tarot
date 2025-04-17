@@ -16,6 +16,11 @@ import javazoom.jl.player.Player;
 /**
  *
  * @author René Rodríguez Martínez
+ * 
+ * 
+ * Aplicacion sencilla de un tarot donde al revelar una carta sale 1  carta aleatoria
+ * de las 22 cartas de los arcanos,
+ * donde al revelarse puede salir boca abajo o boca arriba
  */
 public class Inicio extends javax.swing.JFrame {
 
@@ -25,6 +30,10 @@ public class Inicio extends javax.swing.JFrame {
     private final int CANTIDAD_DE_CARTAS=22; 
     //ruta donde esta el sonido a reproducir
     private final String RUTA_SONIDO="src/sonidos/voltear.mp3"; 
+    //ruta donde esta la imagen del reverso de las cartas
+    private final String RUTA_REVERSO="/img/tarot_cover_red.png"; 
+    //ruta donde esta la imagen que se podra de backgraund
+    private final String RUTA_FONDO="/img/tapete.png"; 
     //objeto random con el que vamos a randomizar sacar cartas aleatorias
     private Random random;
     //para saber si se ha revelado la carta antes para dar la vuelta a la carta
@@ -34,8 +43,8 @@ public class Inicio extends javax.swing.JFrame {
     
     public Inicio() {
         initComponents();
-        jLabel1.setIcon(new ImageIcon(getClass().getResource("/img/tarot_cover_red.png")));
-        jLabel2.setIcon(new ImageIcon(getClass().getResource("/img/tapete.png")));       
+        jLabel1.setIcon(new ImageIcon(getClass().getResource(RUTA_REVERSO)));
+        jLabel2.setIcon(new ImageIcon(getClass().getResource(RUTA_FONDO)));       
         cartas = new ArrayList<>();
         random=new Random();
         reverso=true;
@@ -75,7 +84,10 @@ public class Inicio extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        //cada vez que se pulse el label se cambiara su imagen con etse metodo
         mostrarCarta();
+        //ademas tambien se reproducira el sonido
+        reproducir_sonido();
     }//GEN-LAST:event_jLabel1MouseClicked
 
     /**
@@ -124,39 +136,50 @@ public class Inicio extends javax.swing.JFrame {
             cartas.add("/img-cartas/" + i + ".png");
         }
     }
-    
-   private void mostrarCarta() {
-        String ruta;   
+    //metodo para revelar o poner el reveso de las cartas
+    private void mostrarCarta() {
+        String ruta;
+        //comprobamos si esta boca abajo la carta para mostrar una carta boca arriba
         if (reverso) {
+            //elegimos un numero desde el 1 al 22
             int i = random.nextInt(cartas.size());
+            //y sacamos ese String del arraylist
             ruta = cartas.get(i);
-
+            //lo convertimos en un imageicon para ponerlo en el label            
             ImageIcon icon = new ImageIcon(getClass().getResource(ruta));
 
-            // 50% de probabilidad de mostrarla al revés
+            // con el objeto random scamos un bolean aleatorio donde puede salir o bien true o false de manera igualitaria
+            //para que si sale true le damos la vuelta si no la ponemos normal
             if (random.nextBoolean()) {
                 Image img = icon.getImage();
                 BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bi.createGraphics();
+                //con esto rotamos la imagen 180 gradios
                 g2d.rotate(Math.toRadians(180), icon.getIconWidth() / 2.0, icon.getIconHeight() / 2.0);
                 g2d.drawImage(img, 0, 0, null);
                 g2d.dispose();
                 icon = new ImageIcon(bi);
             }
-
+            //ponemos la imagen el el label
             jLabel1.setIcon(icon);
+            //y indicamos que la carta esta volteada
             reverso = false;
+     
         } else {
+            //en caso de que el label ya tenga una carta simplemente ponemos el reverso
             jLabel1.setIcon(new ImageIcon(getClass().getResource("/img/tarot_cover_red.png")));
             reverso = true;
         }
-        reproducir_sonido();
     }
     
+    //metodo que reproduce el sonido de la constante con JLayer
     private void reproducir_sonido() {
            try {
+            //archivo de audio
             FileInputStream fis = new FileInputStream(RUTA_SONIDO);
+            //el objeto player seria como una especie de reproductor
             Player player = new Player(fis);
+            //reproducir el sonido
             player.play();
         } catch (Exception e) {
             System.out.println("Error al reproducir el Sonido de voltear la carta: " + e.getMessage());
